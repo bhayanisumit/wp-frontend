@@ -1,70 +1,108 @@
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { isAdmin, logout } from '../middleware/authService';
-
 export default function Navbar() {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const root = div();
 
-  const handleLogout = () => {
-    logout()
-    navigate('/');
-  };
-  if (location.pathname === "/login") {
-    return null;
+  function handleLogout() {
+    localStorage.removeItem("token");
+    window.location.href = "/";
   }
-  return (
-    <>
-      <nav className="navbar navbar-expand-lg py-3 custom-navbar">
-        <div className="container-fluid ">
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span className="navbar-toggler-icon" />
-          </button>
-          <div className="collapse navbar-collapse justify-content-center" id="navbarNav">
-            <ul className="navbar-nav">
 
-              <li className="nav-item">
-                <NavLink
-                  to="/"
-                  className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}
-                >
-                  About Us
-                </NavLink>
-              </li>
+  function render() {
+    const token = localStorage.getItem("token");
 
-              <li className="nav-item">
-                <NavLink
-                  to="/articles"
-                  className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}
-                >
-                  Articles
-                </NavLink>
-              </li>
-              {isAdmin() ? (
-                <>
-                  <li className="nav-item admin-login">
-                    <NavLink
-                      to="/admin"
-                      className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}
-                    >
-                      Admin
-                    </NavLink>
-                    <button onClick={handleLogout} className="logout-btn">Logout</button>
-                  </li>
-                </>
-              ) : (
-                <li className="nav-item">
-                  <NavLink
-                    to="/login"
-                    className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}
-                  >
-                    Admin Login
-                  </NavLink>
-                </li>
-              )}
-            </ul>
-          </div>
-        </div>
-      </nav>
-    </>
-  );
+    root.appendChild(
+      nav(
+        { class: "navbar navbar-expand-lg py-3 custom-navbar" },
+        div(
+          { class: "container-fluid" },
+          button(
+            {
+              class: "navbar-toggler",
+              type: "button",
+              "data-bs-toggle": "collapse",
+              "data-bs-target": "#navbarNav",
+              "aria-controls": "navbarNav",
+              "aria-expanded": "false",
+              "aria-label": "Toggle navigation",
+            },
+            span({ class: "navbar-toggler-icon" })
+          ),
+          div(
+            {
+              class: "collapse navbar-collapse justify-content-center",
+              id: "navbarNav",
+            },
+            ul(
+              { class: "navbar-nav" },
+              li(
+                { class: "nav-item" },
+                a(
+                  {
+                    href: "/",
+                    class:
+                      "nav-link" +
+                      (window.location.pathname === "/" ? " active" : ""),
+                  },
+                  "About Us"
+                )
+              ),
+              li(
+                { class: "nav-item" },
+                a(
+                  {
+                    href: "/articles",
+                    class:
+                      "nav-link" +
+                      (window.location.pathname.startsWith("/articles")
+                        ? " active"
+                        : ""),
+                  },
+                  "Articles"
+                )
+              ),
+              token
+                ? [
+                    li(
+                      { class: "nav-item" },
+                      a(
+                        {
+                          href: "/admin",
+                          class:
+                            "nav-link" +
+                            (window.location.pathname.startsWith("/admin")
+                              ? " active"
+                              : ""),
+                        },
+                        "Admin"
+                      )
+                    ),
+                    li(
+                      { class: "nav-item" },
+                      button(
+                        { class: "logout-btn", onclick: handleLogout },
+                        "Logout"
+                      )
+                    ),
+                  ]
+                : li(
+                    { class: "nav-item" },
+                    a(
+                      {
+                        href: "/login",
+                        class:
+                          "nav-link" +
+                          (window.location.pathname === "/login"
+                            ? " active"
+                            : ""),
+                      },
+                      "Admin Login"
+                    )
+                  )
+            )
+          )
+        )
+      )
+    );
+  }
+  render();
+  return root;
 }
